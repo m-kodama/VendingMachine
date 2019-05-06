@@ -9,6 +9,9 @@ public class VendingMachine {
 	private static final String MESSAGE_OPERATION_EXPLANATION = "入金する金額または商品名を入力してください";
 	private static final String MESSAGE_INPUT_ERROR = "入力が間違っています";
 	private static final String MESSAGE_LACK_WALLET = "入金金額が不足しています";
+	private static final String MESSAGE_SOLD_OUT = "%sは売り切れです";
+	private static final String MESSAGE_CHANGE = "お釣りは%d円です";
+	private static final String MESSAGE_WALLET_AMOUNT = "入金金額: %d円";
 
 	// 自動販売機に入っている飲料
 	private final List<Drink> drinkList = new ArrayList<Drink>();
@@ -37,7 +40,7 @@ public class VendingMachine {
 	/**
 	 * 商品を表示
 	 */
-	public void dispayDrink() {
+	public void displayDrink() {
 		for (Drink drink: this.drinkList) {
 			System.out.println(drink);
 		}
@@ -102,10 +105,11 @@ public class VendingMachine {
 			System.out.println();
 
 			// ドリンクの情報を表示
-			dispayDrink();
+			displayDrink();
 
 			// 入金金額を表示
-			System.out.println("入金金額: " + this.wallet.getAmount() + "円");
+			System.out.printf(MESSAGE_WALLET_AMOUNT, this.wallet.getAmount());
+			System.out.println();
 
 			// 操作説明を表示
 			System.out.println(MESSAGE_OPERATION_EXPLANATION);
@@ -137,7 +141,8 @@ public class VendingMachine {
 			}
 			// 商品の在庫があるか判定
 			if (selectedDrink.isEmptyStock()) {
-				System.out.println(selectedDrink.getName() + "は売り切れです");
+				System.out.printf(MESSAGE_SOLD_OUT, selectedDrink.getName());
+				System.out.println();
 				continue;
 			}
 
@@ -147,7 +152,8 @@ public class VendingMachine {
 			// 入金金額を減らす（お釣りがあれば返す）
 			int change = this.wallet.pay(selectedDrink.getPrice());
 			if (change > 0) {
-				System.out.println("お釣りは" + change + "円です");
+				System.out.printf(MESSAGE_CHANGE, change);
+				System.out.println();
 			}
 		}
 	}
