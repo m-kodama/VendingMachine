@@ -5,11 +5,159 @@ import java.util.List;
 import java.util.Scanner;
 
 public class VendingMachine {
+	// メッセージ
+	private static final String MESSAGE_OPERATION_EXPLANATION = "入金する金額または商品名を入力してください";
+	private static final String MESSAGE_INPUT_ERROR = "入力が間違っています";
+	private static final String MESSAGE_LACK_WALLET = "入金金額が不足しています";
+
+	// 自動販売機に入っている飲料
+	private final List<Drink> drinkList = new ArrayList<Drink>();
+	// 自動販売機の料金管理を行うクラス
+	private final Wallet wallet = new Wallet();
 
 	public VendingMachine() {
 	}
 
+	/**
+	 * 飲み物をセットする
+	 * @param drink 飲み物
+	 */
+	public void setDrink(Drink drink) {
+		this.drinkList.add(drink);
+	}
+
+	/**
+	 * 飲み物をセットする
+	 * @param drinkList 飲み物のリスト
+	 */
+	public void setDrink(List<Drink> drinkList) {
+		this.drinkList.addAll(drinkList);
+	}
+
+	/**
+	 * 商品を表示
+	 */
+	public void dispayDrink() {
+		for (Drink drink: this.drinkList) {
+			System.out.println(drink);
+		}
+	}
+
+	/**
+	 * 標準入力から文字列を入力させる
+	 * @return
+	 */
+	public String inputStr() {
+		Scanner scan = new Scanner(System.in);
+		return scan.nextLine();
+	}
+
+	/**
+	 * 引数に渡した文字列が数値かどうかを判定する
+	 * @param str
+	 * @return	ture: 数値のとき, false: 数値ではないとき
+	 */
+	public boolean isNumeric(String str) {
+		return str.matches("[0-9]+");
+	}
+
+	/**
+	 * 引数に渡した文字列を数値に変換する
+	 * @param str
+	 * @return	変換した数値(変換に失敗した場合は0を返す)
+	 */
+	public int parseInt(String str) {
+		try {
+			return Integer.parseInt(str);
+		} catch (NumberFormatException e) {
+			// 数値ではなかったとき
+			e.printStackTrace();
+			return 0;
+		}
+	}
+
+	/**
+	 * 引数に指定した名前の飲み物を返す
+	 * @param drinkName
+	 * @return	一致した飲み物（一致する飲み物がなければnullを返す）
+	 */
+	public Drink getDrink(String drinkName) {
+		for (Drink drink: drinkList) {
+			if (drink.getName().equals(drinkName)) {
+				return drink;
+			}
+		}
+
+		return null;
+	}
+
+
+	/**
+	 * 自動販売機を起動
+	 */
 	public void run() {
+		// 自販機はずっと動いているのでwhile(true)にしておく
+		while (true) {
+			// 改行
+			System.out.println();
+
+			// ドリンクの情報を表示
+			dispayDrink();
+
+			// 入金金額を表示
+			System.out.println("入金金額: " + this.wallet.getAmount() + "円");
+
+			// 操作説明を表示
+			System.out.println(MESSAGE_OPERATION_EXPLANATION);
+
+			// キーボードから読み取る
+			String str = inputStr();
+
+			// 数値がどうか判定
+			if (isNumeric(str)) {
+				int money = parseInt(str);
+				this.wallet.add(money);
+				continue;
+			}
+
+			// 商品名と一致する飲み物を取得（一致する飲み物がなければnull）
+			Drink selectedDrink = getDrink(str);
+
+			// 商品が見つからなかったとき
+			if (selectedDrink == null) {
+				System.out.println(MESSAGE_INPUT_ERROR);
+				continue;
+			}
+
+			// 商品が見つかった場合
+			// 入金金額が不足していないか判定
+			if (!this.wallet.canPay(selectedDrink.getPrice())) {
+				System.out.println(MESSAGE_LACK_WALLET);
+				continue;
+			}
+			// 商品の在庫があるか判定
+			if (selectedDrink.isEmptyStock()) {
+				System.out.println(selectedDrink.getName() + "は売り切れです");
+				continue;
+			}
+
+			// 商品を渡し在庫を減らす
+			selectedDrink.buy();
+
+			// 入金金額を減らす（お釣りがあれば返す）
+			int change = this.wallet.pay(selectedDrink.getPrice());
+			if (change > 0) {
+				System.out.println("お釣りは" + change + "円です");
+			}
+		}
+	}
+
+
+
+	/**
+	 * 手続き型で実行
+	 */
+	public void _run() {
 		// 自販機の中身
 		List<String> drinkList = new ArrayList<String>();
 		List<Integer> drinkCountList = new ArrayList<Integer>();
