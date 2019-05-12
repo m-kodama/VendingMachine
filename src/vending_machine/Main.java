@@ -1,5 +1,7 @@
 package vending_machine;
 
+import common.WebAPI;
+
 public class Main {
 
 	public static void main(String[] args) {
@@ -13,7 +15,13 @@ public class Main {
 		vm.setDrink(new Drink("お茶", 100, 150));
 
 		// 自動販売機を起動
-		vm.run();
+//		vm.run();
+
+		System.out.println("before api call");
+
+		System.out.println(WebAPI.call());
+
+		System.out.println("after api call");
 	}
 
 }
